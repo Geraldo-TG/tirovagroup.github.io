@@ -36,6 +36,7 @@
     --paper:    #F4F4F4;   /* light background — matches logo's background exactly */
     --paper-2:  #E7E7E5;   /* slightly darker paper, for cards */
     --gold:     #3A74AC;   /* primary accent — the blue from the logo mark */
+    --gold-bright: #5B9AE0; /* brighter blue, for glows/gradients/motion accents */
     --rust:     #8B8D8F;   /* secondary accent — the grey from the logo mark */
     --ink:      #1D242C;   /* body text on paper */
     --ink-soft: #5B6672;   /* muted text on paper */
@@ -108,7 +109,7 @@
   }
 
   .logo-icon {
-    height: 38px;
+    height: 52px;
     width: auto;
     flex-shrink: 0;
   }
@@ -161,12 +162,35 @@
   .hero::before {
     content: "";
     position: absolute;
-    inset: 0;
+    inset: -48px;
     background-image:
-      linear-gradient(rgba(58,116,172,0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(58,116,172,0.05) 1px, transparent 1px);
+      linear-gradient(rgba(58,116,172,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(58,116,172,0.06) 1px, transparent 1px);
     background-size: 48px 48px;
     pointer-events: none;
+    animation: driftGrid 18s linear infinite;
+  }
+
+  .hero::after {
+    content: "";
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 640px;
+    height: 640px;
+    background: radial-gradient(circle, rgba(91,154,224,0.22) 0%, rgba(91,154,224,0) 68%);
+    pointer-events: none;
+    animation: pulseGlow 6s ease-in-out infinite;
+  }
+
+  @keyframes driftGrid {
+    from { background-position: 0 0, 0 0; }
+    to { background-position: 48px 48px, 48px 48px; }
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% { opacity: 0.7; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.08); }
   }
 
   .hero-inner {
@@ -205,7 +229,7 @@
     display: inline-block;
     transition: transform 0.15s ease, background 0.15s ease;
   }
-  .btn-primary:hover { background: #E4B562; transform: translateY(-2px); }
+  .btn-primary:hover { background: var(--gold-bright); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(58,116,172,0.35); }
 
   .btn-secondary {
     border: 1px solid rgba(244,239,228,0.35);
@@ -230,9 +254,37 @@
     height: 2px;
     background: repeating-linear-gradient(
       90deg,
-      rgba(58,116,172,0.5) 0 10px,
+      rgba(58,116,172,0.55) 0 10px,
       transparent 10px 20px
     );
+    background-size: 40px 100%;
+    animation: flowDashes 1.4s linear infinite;
+  }
+
+  @keyframes flowDashes {
+    from { background-position: 0 0; }
+    to { background-position: 40px 0; }
+  }
+
+  .route-shipment {
+    position: absolute;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    background: var(--gold-bright);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(91,154,224,0.25), 0 0 14px rgba(91,154,224,0.9);
+    transform: translate(-50%, -50%);
+    animation: travelRoute 4.5s ease-in-out infinite;
+  }
+
+  @keyframes travelRoute {
+    0%   { left: 0%; opacity: 0; }
+    6%   { opacity: 1; }
+    46%  { opacity: 1; }
+    50%  { left: 100%; opacity: 0; }
+    50.01% { left: 0%; }
+    100% { left: 0%; opacity: 0; }
   }
 
   .route-nodes {
@@ -259,6 +311,14 @@
   .route-node:nth-child(1) .route-dot,
   .route-node:nth-child(4) .route-dot {
     background: var(--gold);
+    animation: dotPulse 2.4s ease-in-out infinite;
+  }
+
+  .route-node:nth-child(4) .route-dot { animation-delay: 1.2s; }
+
+  @keyframes dotPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(91,154,224,0.5); }
+    50% { box-shadow: 0 0 0 6px rgba(91,154,224,0); }
   }
 
   .route-label {
@@ -270,7 +330,51 @@
     text-align: center;
   }
 
-  /* ---------- SECTION HEADERS ---------- */
+  /* ---------- FLOW TICKER (animated marquee) ---------- */
+  .ticker {
+    background: var(--gold);
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+  }
+
+  .ticker-track {
+    display: inline-flex;
+    animation: tickerScroll 22s linear infinite;
+  }
+
+  .ticker-track span {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cream);
+    padding: 14px 28px;
+    flex-shrink: 0;
+  }
+
+  .ticker-track span.dot { color: var(--gold-bright); padding: 14px 0; }
+
+  @keyframes tickerScroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ticker-track,
+    .hero::before,
+    .hero::after,
+    .route-track,
+    .route-shipment,
+    .route-node:nth-child(1) .route-dot,
+    .route-node:nth-child(4) .route-dot {
+      animation: none !important;
+    }
+    .route-shipment { display: none; }
+  }
+
+
   .section { padding: 88px 0; }
   .section-dark { background: var(--navy-800); color: var(--cream); }
 
@@ -304,10 +408,31 @@
   .service-card {
     background: var(--paper);
     padding: 36px;
-    transition: background 0.15s ease;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.2s ease, transform 0.25s ease, box-shadow 0.25s ease;
   }
 
-  .service-card:hover { background: var(--paper-2); }
+  .service-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--gold);
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.3s ease;
+  }
+
+  .service-card:hover {
+    background: var(--paper-2);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 32px rgba(22,33,43,0.1);
+  }
+
+  .service-card:hover::before { transform: scaleY(1); }
 
   .service-tag {
     font-family: var(--font-mono);
@@ -316,7 +441,10 @@
     color: var(--rust);
     margin-bottom: 14px;
     display: block;
+    transition: color 0.25s ease;
   }
+
+  .service-card:hover .service-tag { color: var(--gold); }
 
   .service-card h3 {
     font-size: 1.25rem;
@@ -423,6 +551,11 @@
   }
   .reveal.is-visible { opacity: 1; transform: translateY(0); }
 
+  .services-grid .service-card:nth-child(1) { transition-delay: 0s; }
+  .services-grid .service-card:nth-child(2) { transition-delay: 0.08s; }
+  .services-grid .service-card:nth-child(3) { transition-delay: 0.16s; }
+  .services-grid .service-card:nth-child(4) { transition-delay: 0.24s; }
+
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     .reveal { opacity: 1; transform: none; transition: none; }
@@ -471,6 +604,7 @@
 
     <div class="route">
       <div class="route-track"></div>
+      <div class="route-shipment"></div>
       <div class="route-nodes">
         <div class="route-node"><div class="route-dot"></div><span class="route-label">Source</span></div>
         <div class="route-node"><div class="route-dot"></div><span class="route-label">Procure</span></div>
@@ -480,6 +614,23 @@
     </div>
   </div>
 </section>
+
+<div class="ticker">
+  <div class="ticker-track">
+    <span>Sourcing</span><span class="dot">&bull;</span>
+    <span>Procurement</span><span class="dot">&bull;</span>
+    <span>Warehousing</span><span class="dot">&bull;</span>
+    <span>Freight</span><span class="dot">&bull;</span>
+    <span>Cost Control</span><span class="dot">&bull;</span>
+    <span>Last-Mile Delivery</span><span class="dot">&bull;</span>
+    <span>Sourcing</span><span class="dot">&bull;</span>
+    <span>Procurement</span><span class="dot">&bull;</span>
+    <span>Warehousing</span><span class="dot">&bull;</span>
+    <span>Freight</span><span class="dot">&bull;</span>
+    <span>Cost Control</span><span class="dot">&bull;</span>
+    <span>Last-Mile Delivery</span><span class="dot">&bull;</span>
+  </div>
+</div>
 
 <section class="section" id="services">
   <div class="container">
